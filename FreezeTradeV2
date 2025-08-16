@@ -1,0 +1,103 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+
+-- RemoteEvent for freezing
+local TradeFreezeEvent = ReplicatedStorage:FindFirstChild("TradeFreezeEvent") or Instance.new("RemoteEvent", ReplicatedStorage)
+TradeFreezeEvent.Name = "TradeFreezeEvent"
+
+-- GUI setup
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "DashScriptUI"
+
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.fromOffset(350, 280)
+frame.Position = UDim2.new(0.05, 0, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 15)
+
+-- Title
+local title = Instance.new("TextLabel", frame)
+title.Text = "Dash Script"
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel", frame)
+subtitle.Text = "Trade Freeze | Grow A Garden"
+subtitle.Size = UDim2.new(1, -20, 0, 25)
+subtitle.Position = UDim2.new(0, 10, 0, 40)
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextSize = 16
+subtitle.TextColor3 = Color3.fromRGB(200,200,200)
+subtitle.BackgroundTransparency = 1
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Toggle button
+local toggleBtn = Instance.new("TextButton", frame)
+toggleBtn.Size = UDim2.new(1, -20, 0, 40)
+toggleBtn.Position = UDim2.new(0, 10, 0, 75)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 18
+toggleBtn.Text = "Enable Trade Freeze (OFF)"
+Instance.new("UICorner", toggleBtn)
+
+-- Status label
+local status = Instance.new("TextLabel", frame)
+status.Size = UDim2.new(1, -20, 0, 50)
+status.Position = UDim2.new(0, 10, 0, 125)
+status.Font = Enum.Font.Gotham
+status.TextSize = 16
+status.TextColor3 = Color3.fromRGB(210,210,210)
+status.BackgroundTransparency = 1
+status.TextWrapped = true
+status.TextXAlignment = Enum.TextXAlignment.Left
+status.Text = "Trade Status: Normal. You can trade freely."
+
+-- Buttons
+local offerBtn = Instance.new("TextButton", frame)
+offerBtn.Size = UDim2.new(1, -20, 0, 40)
+offerBtn.Position = UDim2.new(0, 10, 0, 185)
+offerBtn.BackgroundColor3 = Color3.fromRGB(40,120,255)
+offerBtn.TextColor3 = Color3.fromRGB(255,255,255)
+offerBtn.Font = Enum.Font.GothamBold
+offerBtn.TextSize = 18
+offerBtn.Text = "Offer Pets (Priority)"
+Instance.new("UICorner", offerBtn)
+
+local acceptBtn = Instance.new("TextButton", frame)
+acceptBtn.Size = UDim2.new(1, -20, 0, 40)
+acceptBtn.Position = UDim2.new(0, 10, 0, 235)
+acceptBtn.BackgroundColor3 = Color3.fromRGB(200,60,60)
+acceptBtn.TextColor3 = Color3.fromRGB(255,255,255)
+acceptBtn.Font = Enum.Font.GothamBold
+acceptBtn.TextSize = 18
+acceptBtn.Text = "Force Accept"
+Instance.new("UICorner", acceptBtn)
+
+-- Logic
+local frozen = false
+toggleBtn.MouseButton1Click:Connect(function()
+    frozen = not frozen
+    toggleBtn.Text = frozen and "Enable Trade Freeze (ON)" or "Enable Trade Freeze (OFF)"
+    status.Text = frozen and "Trade Status: Frozen. You cannot accept new trades." or "Trade Status: Normal. You can trade freely."
+    TradeFreezeEvent:FireServer(frozen)
+end)
+
+offerBtn.MouseButton1Click:Connect(function()
+    status.Text = "Offering pets…"
+end)
+
+acceptBtn.MouseButton1Click:Connect(function()
+    status.Text = "Trade accepted!"
+end)
