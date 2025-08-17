@@ -1,45 +1,74 @@
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
 -- Create GUI
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "ShowZysumeSpawner"
+screenGui.Name = "AutoAge50Gui"
+screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 400, 0, 250)
-frame.Position = UDim2.new(0.5, -200, 0.5, -125)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.Size = UDim2.new(0, 250, 0, 120)
+frame.Position = UDim2.new(0.5, -125, 0.7, -60)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
 frame.Parent = screenGui
 
 -- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 40)
+title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
-title.Text = "Show Zysume"
+title.Text = "Pet Auto Age 50"
 title.Font = Enum.Font.SourceSansBold
-title.TextSize = 28
+title.TextSize = 22
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Parent = frame
 
--- Pet Name Box
-local petBox = Instance.new("TextBox")
-petBox.Size = UDim2.new(0.9, 0, 0, 30)
-petBox.Position = UDim2.new(0.05, 0, 0.25, 0)
-petBox.PlaceholderText = "Enter pet name (e.g. Kitsune)"
-petBox.Text = ""
-petBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-petBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-petBox.ClearTextOnFocus = false
-petBox.Parent = frame
+-- Holding Display
+local holdingLabel = Instance.new("TextLabel")
+holdingLabel.Size = UDim2.new(1, -20, 0, 30)
+holdingLabel.Position = UDim2.new(0, 10, 0.35, 0)
+holdingLabel.BackgroundTransparency = 1
+holdingLabel.Text = "Holding: None"
+holdingLabel.Font = Enum.Font.SourceSans
+holdingLabel.TextSize = 20
+holdingLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+holdingLabel.TextXAlignment = Enum.TextXAlignment.Left
+holdingLabel.Parent = frame
 
--- Age Box
-local ageBox = Instance.new("TextBox")
-ageBox.Size = UDim2.new(0.9, 0, 0, 30)
-ageBox.Position = UDim2.new(0.05, 0, 0.45, 0)
-ageBox.PlaceholderText = "Pet Age (number)"
-ageBox.Text = "1"
-ageBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ageBox.TextColor3 = Color3.fromRGB(255, 255, 255
+-- Button
+local autoBtn = Instance.new("TextButton")
+autoBtn.Size = UDim2.new(0.9, 0, 0, 30)
+autoBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
+autoBtn.Text = "Age 50"
+autoBtn.Font = Enum.Font.SourceSansBold
+autoBtn.TextSize = 20
+autoBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 100)
+autoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoBtn.Parent = frame
+
+-- Function: Set Pet Age
+local function setPetAge(pet)
+	if pet:FindFirstChild("Age") then
+		pet.Age.Value = 50
+		print("✅ Set " .. pet.Name .. " Age to 50")
+	else
+		warn("⚠️ Pet has no 'Age' value")
+	end
+end
+
+-- Auto Age Button Click
+autoBtn.MouseButton1Click:Connect(function()
+	local character = player.Character
+	if character then
+		-- Check if player is holding a pet
+		local tool = character:FindFirstChildOfClass("Tool")
+		if tool then
+			holdingLabel.Text = "Holding: " .. tool.Name
+			setPetAge(tool)
+		else
+			holdingLabel.Text = "Holding: None"
+			warn("⚠️ No pet equipped!")
+		end
+	end
+end)
