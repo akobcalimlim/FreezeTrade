@@ -1,74 +1,57 @@
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local player = game.Players.LocalPlayer
+local frame = script.Parent
 
--- Create GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "AutoAge50Gui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
+local closeBtn = frame:WaitForChild("CloseButton")
+local dropdownBtn = frame:WaitForChild("PetDropdown")
+local petList = frame:WaitForChild("PetList")
+local ageBox = frame:WaitForChild("AgeBox")
+local weightBox = frame:WaitForChild("WeightBox")
+local spawnBtn = frame:WaitForChild("SpawnButton")
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 250, 0, 120)
-frame.Position = UDim2.new(0.5, -125, 0.7, -60)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 0
-frame.Parent = screenGui
+local petsFolder = game.ReplicatedStorage:WaitForChild("Pets")
+local chosenPet = nil
 
--- Title
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundTransparency = 1
-title.Text = "Pet Auto Age 50"
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 22
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Parent = frame
+-- Close
+closeBtn.MouseButton1Click:Connect(function()
+	frame.Visible = false
+end)
 
--- Holding Display
-local holdingLabel = Instance.new("TextLabel")
-holdingLabel.Size = UDim2.new(1, -20, 0, 30)
-holdingLabel.Position = UDim2.new(0, 10, 0.35, 0)
-holdingLabel.BackgroundTransparency = 1
-holdingLabel.Text = "Holding: None"
-holdingLabel.Font = Enum.Font.SourceSans
-holdingLabel.TextSize = 20
-holdingLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-holdingLabel.TextXAlignment = Enum.TextXAlignment.Left
-holdingLabel.Parent = frame
+-- Dropdown toggle
+dropdownBtn.MouseButton1Click:Connect(function()
+	petList.Visible = not petList.Visible
+end)
 
--- Button
-local autoBtn = Instance.new("TextButton")
-autoBtn.Size = UDim2.new(0.9, 0, 0, 30)
-autoBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
-autoBtn.Text = "Age 50"
-autoBtn.Font = Enum.Font.SourceSansBold
-autoBtn.TextSize = 20
-autoBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 100)
-autoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoBtn.Parent = frame
+-- Fill dropdown with pets
+for _, pet in ipairs(petsFolder:GetChildren()) do
+	if pet:IsA("Model") then
+		local option = Instance.new("TextButton")
+		option.Size = UDim2.new(1, 0, 0, 30)
+		option.Text = pet.Name
+		option.Parent = petList
 
--- Function: Set Pet Age
-local function setPetAge(pet)
-	if pet:FindFirstChild("Age") then
-		pet.Age.Value = 50
-		print("✅ Set " .. pet.Name .. " Age to 50")
-	else
-		warn("⚠️ Pet has no 'Age' value")
+		option.MouseButton1Click:Connect(function()
+			chosenPet = pet.Name
+			dropdownBtn.Text = "Pet: " .. pet.Name
+			petList.Visible = false
+		end)
 	end
 end
 
--- Auto Age Button Click
-autoBtn.MouseButton1Click:Connect(function()
-	local character = player.Character
-	if character then
-		-- Check if player is holding a pet
-		local tool = character:FindFirstChildOfClass("Tool")
-		if tool then
-			holdingLabel.Text = "Holding: " .. tool.Name
-			setPetAge(tool)
-		else
-			holdingLabel.Text = "Holding: None"
-			warn("⚠️ No pet equipped!")
+-- Spawn
+spawnBtn.MouseButton1Click:Connect(function()
+	if not chosenPet then return end
+	
+	local petTemplate = petsFolder:FindFirstChild(chosenPet)
+	if petTemplate then
+		local newPet = petTemplate:Clone()
+		newPet.Parent = workspace
+
+		-- Spawn near player
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if root then
+			newPet:MoveTo(root.Position + Vector3.new(3, 0, 3))
 		end
-	end
-end)
+
+		-- Attributes
+		local age = tonumber(ageBox.Text) or 1
+		local weight
